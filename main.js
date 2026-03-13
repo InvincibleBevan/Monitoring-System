@@ -1,4 +1,3 @@
-// --- DOM Elements ---
 const valPh = document.getElementById('val-ph');
 const progPh = document.getElementById('prog-ph');
 const trendPh = document.getElementById('trend-ph');
@@ -33,28 +32,26 @@ if(timeInit) {
     timeInit.innerText = new Date().toLocaleTimeString();
 }
 
-// Navigation Elements
+
 const navItems = document.querySelectorAll('.nav-item');
 const viewSections = document.querySelectorAll('.view-section');
 
-// --- State Variables ---
+
 let simulationInterval;
 let isContaminated = false;
 let score = 98;
 let alertsCount = 0;
 let smsEnabled = true;
 
-// Current Sensor Values (Starting points)
+
 let currentPh = 7.2;
 let currentTur = 1.5;
 let currentTemp = 18.5;
 let currentCond = 350;
 
-// Chart configuration
 const ctx = document.getElementById('mainChart').getContext('2d');
 const MAX_DATA_POINTS = 20;
 
-// Chart.js global defaults for dark mode
 Chart.defaults.color = '#94a3b8';
 Chart.defaults.font.family = "'Outfit', sans-serif";
 
@@ -90,7 +87,7 @@ const telemetryChart = new Chart(ctx, {
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                display: false // Using custom HTML legend
+                display: false 
             },
             tooltip: {
                 mode: 'index',
@@ -104,7 +101,7 @@ const telemetryChart = new Chart(ctx, {
         },
         scales: {
             x: {
-                display: false // Hide x axis labels for streaming feel
+                display: false
             },
             y: {
                 type: 'linear',
@@ -122,7 +119,7 @@ const telemetryChart = new Chart(ctx, {
                 display: true,
                 position: 'right',
                 grid: {
-                    drawOnChartArea: false // only want the grid lines for one axis
+                    drawOnChartArea: false 
                 },
                 min: 0,
                 max: 10,
@@ -130,14 +127,11 @@ const telemetryChart = new Chart(ctx, {
             }
         },
         animation: {
-            duration: 0 // Disable animation for smoother streaming
+            duration: 0 
         }
     }
 });
 
-// --- Helper Functions ---
-
-// Generate a random walk value within bounds
 function getNextValue(current, min, max, maxDelta, forceTrend = 0) {
     let delta = (Math.random() * maxDelta * 2) - maxDelta;
     delta += forceTrend;
@@ -147,7 +141,7 @@ function getNextValue(current, min, max, maxDelta, forceTrend = 0) {
     return Number(next.toFixed(2));
 }
 
-// Update UI Cards
+
 function updateCard(valEl, progEl, trendEl, value, type) {
     valEl.innerText = value;
     
@@ -157,14 +151,14 @@ function updateCard(valEl, progEl, trendEl, value, type) {
 
     switch(type) {
         case 'ph':
-            // Safe: 6.5 - 8.5
+            
             progEl.style.width = `${(value / 14) * 100}%`;
             if(value < 6.5 || value > 8.5) isDanger = true;
             else if(value < 6.8 || value > 8.2) isWarning = true;
             trendText = isDanger ? "Critical" : isWarning ? "Warning" : "Optimal";
             break;
         case 'tur':
-            // Safe: < 3 
+            
             progEl.style.width = `${(value / 10) * 100}%`;
             if(value > 5) isDanger = true;
             else if(value > 3) isWarning = true;
@@ -183,7 +177,7 @@ function updateCard(valEl, progEl, trendEl, value, type) {
             break;
     }
 
-    // Set classes
+
     trendEl.className = 'trend';
     progEl.classList.remove('danger');
     const cardEl = valEl.closest('.kpi-card');
@@ -201,7 +195,6 @@ function updateCard(valEl, progEl, trendEl, value, type) {
     return { isDanger, isWarning };
 }
 
-// Add log entry
 function addInsight(type, title, desc) {
     const time = new Date().toLocaleTimeString();
     const icon = type === 'danger' ? 'fa-triangle-exclamation' : (type === 'warning' ? 'fa-circle-exclamation' : 'fa-check-circle');
@@ -220,47 +213,45 @@ function addInsight(type, title, desc) {
     insightsLog.insertAdjacentHTML('afterbegin', html);
 }
 
-// --- Main Simulation Loop ---
+
 function simulateTelemetry() {
-    // Determine trends based on scenario
+    
     let phTrend = 0;
     let turTrend = 0;
     
     if (isContaminated) {
-        // Drop pH towards 5.0, Spike Turbidity towards 8.0
+        
         if (currentPh > 5.0) phTrend = -0.15;
         if (currentTur < 8.0) turTrend = +0.4;
         
-        // Minor upward trend for conductivity due to contaminants
+        
         currentCond = getNextValue(currentCond, 200, 1000, 15, +10);
         score = Math.max(12, score - 5);
     } else {
-        // Return to normal
+        
         if (currentPh < 7.2) phTrend = +0.1;
         if (currentTur > 1.5) turTrend = -0.2;
         currentCond = getNextValue(currentCond, 200, 1000, 10, currentCond > 400 ? -10 : 0);
         score = Math.min(98, score + 2);
     }
 
-    // Generate new values
+    
     currentPh = getNextValue(currentPh, 0, 14, 0.05, phTrend);
     currentTur = getNextValue(currentTur, 0, 10, 0.1, turTrend);
     currentTemp = getNextValue(currentTemp, 10, 40, 0.2, 0);
 
-    // Update UI Cards
+    
     const phStatus = updateCard(valPh, progPh, trendPh, currentPh, 'ph');
     const turStatus = updateCard(valTur, progTur, trendTur, currentTur, 'tur');
     const tempStatus = updateCard(valTemp, progTemp, trendTemp, currentTemp, 'temp');
     const condStatus = updateCard(valCond, progCond, trendCond, currentCond, 'cond');
 
-    // Update Chart
+    
     dataStream.datasets[0].data.push(currentPh);
     dataStream.datasets[0].data.shift();
     dataStream.datasets[1].data.push(currentTur);
     dataStream.datasets[1].data.shift();
     telemetryChart.update();
-
-    // AI Safety Index logic
     safetyScore.innerText = `${score}%`;
     
     if (score < 40) {
@@ -276,10 +267,10 @@ function simulateTelemetry() {
     }
 }
 
-// Start simulation
+
 simulationInterval = setInterval(simulateTelemetry, 1000);
 
-// --- Event Listeners ---
+
 btnSimulate.addEventListener('click', () => {
     isContaminated = true;
     btnSimulate.style.display = 'none';
@@ -287,7 +278,7 @@ btnSimulate.addEventListener('click', () => {
     
     addInsight('danger', 'Anomaly Detected!', 'AI identified sharp pH drop correlated with turbidity spike. High probability of industrial runoff or sewage contamination.');
     
-    // Simulate SMS delay
+    
     setTimeout(() => {
         if (smsEnabled) {
             smsModal.classList.add('active');
@@ -323,23 +314,23 @@ if (btnToggleSms) {
     });
 }
 
-// Navigation Click Handler
+
 navItems.forEach(item => {
     item.addEventListener('click', (e) => {
         e.preventDefault();
         
-        // Remove active class from all nav items
+        
         navItems.forEach(nav => nav.classList.remove('active'));
-        // Add active class to clicked item
+    
         item.classList.add('active');
         
-        // Hide all views
+
         viewSections.forEach(view => {
             view.classList.remove('active');
             view.classList.add('hidden');
         });
         
-        // Show corresponding view
+        
         const targetId = item.id.replace('nav-', 'view-');
         const targetView = document.getElementById(targetId);
         if (targetView) {
@@ -347,7 +338,7 @@ navItems.forEach(item => {
             targetView.classList.add('active');
         }
 
-        // Special handling for the charts when switching back to dashboard to handle canvas resizing properly
+        
         if(targetId === 'view-dashboard') {
             setTimeout(() => {
                 if(telemetryChart) telemetryChart.resize();
@@ -356,7 +347,7 @@ navItems.forEach(item => {
     });
 });
 
-// Initialize with a starting log
+
 setTimeout(() => {
     if(!isContaminated) {
         addInsight('safe', 'AI Routine Scan Complete', 'Pattern matches historical safe baseline. No anomalies detected in the last 24h.');

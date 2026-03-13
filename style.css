@@ -36,14 +36,14 @@
 body {
     background-color: var(--bg-dark);
     color: var(--text-main);
-    overflow: hidden; /* Prevent body scroll, handle inside panels */
+    overflow: hidden; 
     background-image: 
         radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 25%),
         radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15), transparent 25%);
     min-height: 100vh;
 }
 
-/* Glassmorphism Classes */
+
 .glass-panel {
     background: var(--bg-card);
     backdrop-filter: blur(12px);
@@ -53,14 +53,12 @@ body {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-/* Layout */
 .app-container {
     display: flex;
     height: 100vh;
     width: 100vw;
 }
 
-/* Sidebar */
 .sidebar {
     width: 260px;
     background: rgba(15, 23, 42, 0.8);
@@ -173,7 +171,7 @@ body {
     animation: pulse 1s infinite alternate;
 }
 
-/* Main Content & View Sections */
+
 .main-content {
     flex: 1;
     padding: 32px;
@@ -192,7 +190,7 @@ body {
     display: flex;
 }
 
-/* Header */
+
 .top-header {
     display: flex;
     justify-content: space-between;
@@ -271,7 +269,7 @@ body {
     transform: translateY(-2px);
 }
 
-/* KPI Grid */
+
 .kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -378,7 +376,7 @@ body {
 .progress.purple { background: var(--accent-purple); box-shadow: 0 0 10px var(--accent-purple); }
 .progress.danger { background: var(--status-danger); box-shadow: 0 0 10px var(--status-danger); }
 
-/* Dashboard Body */
+
 .dashboard-body {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -476,7 +474,7 @@ body {
     color: var(--text-muted);
 }
 
-/* SMS Modal Popup */
+
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -586,7 +584,7 @@ body {
     cursor: pointer;
 }
 
-/* Animations */
+
 @keyframes pulse {
     0% { box-shadow: 0 0 0 0 var(--status-danger-pulse); }
     70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
@@ -609,7 +607,7 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Responsive */
+
 @media (max-width: 1200px) {
     .kpi-grid { grid-template-columns: repeat(2, 1fr); }
     .dashboard-body { grid-template-columns: 1fr; }
